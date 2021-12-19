@@ -155,7 +155,7 @@ class NFSP(rl_agent.AbstractAgent):
 
     Args:
       time_step: an instance of rl_environment.TimeStep.
-      is_evaluation: bool, whether this is a training or evaluation call.
+      is_evaluation: bool, whether this is a training or evaluation call. ## 区分这个是训练阶段还是测试阶段
 
     Returns:
       A `rl_agent.StepOutput` containing the action probs and chosen action.
@@ -163,7 +163,7 @@ class NFSP(rl_agent.AbstractAgent):
     if self._mode == MODE.best_response:
       agent_output = self._rl_agent.step(time_step, is_evaluation)
       if not is_evaluation and not time_step.last():
-        self._add_transition(time_step, agent_output)
+        self._add_transition(time_step, agent_output) #如果best_response,则添加到 msl 中
 
     elif self._mode == MODE.average_policy:
       # Act step: don't act at terminal info states.
@@ -175,7 +175,7 @@ class NFSP(rl_agent.AbstractAgent):
 
       if self._prev_timestep and not is_evaluation:
         self._rl_agent.add_transition(self._prev_timestep, self._prev_action,
-                                      time_step)
+                                      time_step) #如果是averange_response，则添加到 mrl 中
     else:
       raise ValueError("Invalid mode ({})".format(self._mode))
 
@@ -218,7 +218,7 @@ class NFSP(rl_agent.AbstractAgent):
         legal_actions_mask=legal_actions_mask)
     self._reservoir_buffer.add(transition)
 
-  def _learn(self):
+  def _learn(self): #average网络的学习
     """Compute the loss on sampled transitions and perform a avg-network update.
 
     If there are not enough elements in the buffer, no loss is computed and
@@ -228,10 +228,10 @@ class NFSP(rl_agent.AbstractAgent):
       The average loss obtained on this batch of transitions or `None`.
     """
     if (len(self._reservoir_buffer) < self._batch_size or
-        len(self._reservoir_buffer) < self._min_buffer_size_to_learn):
+        len(self._reservoir_buffer) < self._min_buffer_size_to_learn): #buffer数量不够
       return None
 
-    transitions = self._reservoir_buffer.sample(self._batch_size)
+    transitions = self._reservoir_buffer.sample(self._batch_size) #在 reservoir_buffer 采样batch_size个
     info_states = torch.Tensor([t.info_state for t in transitions])
     action_probs = torch.Tensor([t.action_probs for t in transitions])
 
