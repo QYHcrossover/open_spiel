@@ -70,7 +70,7 @@ class NFSP(rl_agent.AbstractAgent):
     self._layer_sizes = hidden_layers_sizes
     self._batch_size = batch_size
     self._learn_every = learn_every
-    self._anticipatory_param = anticipatory_param
+    self._anticipatory_param = anticipatory_param #探索率，0.1 表示 有 0.1的概率是选择best_response,有0.9的概率是选择average_response
     self._min_buffer_size_to_learn = min_buffer_size_to_learn
 
     self._reservoir_buffer = ReservoirBuffer(reservoir_buffer_capacity)
@@ -131,16 +131,16 @@ class NFSP(rl_agent.AbstractAgent):
 
   def _act(self, info_state, legal_actions):
     info_state = np.reshape(info_state, [1, -1])
-    action_values = self._avg_network(torch.Tensor(info_state))
-    action_probs = F.softmax(action_values, dim=1).detach()
+    action_values = self._avg_network(torch.Tensor(info_state)) #策略网络,产生各个action的值
+    action_probs = F.softmax(action_values, dim=1).detach() #通过softmax函数，产生各个action的概率分布
 
-    self._last_action_values = action_values[0]
+    self._last_action_values = action_values[0] #？
     # Remove illegal actions, normalize probs
     probs = np.zeros(self._num_actions)
     probs[legal_actions] = action_probs[0][legal_actions]
-    probs /= sum(probs)
-    action = np.random.choice(len(probs), p=probs)
-    return action, probs
+    probs /= sum(probs) #将所有的合法动作归一化，非法动作的概率置为0
+    action = np.random.choice(len(probs), p=probs) #根据概率分布采样一个动作
+    return action, probs #返回采样得到的动作，以及每个动作的概率
 
   @property
   def mode(self):
@@ -170,8 +170,8 @@ class NFSP(rl_agent.AbstractAgent):
       if not time_step.last():
         info_state = time_step.observations["info_state"][self.player_id]
         legal_actions = time_step.observations["legal_actions"][self.player_id]
-        action, probs = self._act(info_state, legal_actions)
-        agent_output = rl_agent.StepOutput(action=action, probs=probs)
+        action, probs = self._act(info_state, legal_actions) #根据策略网络来得到一个策略，即probs(合法动作prob和为1，非法动作的prob为0)；根据该策略采样一个动作
+        agent_output = rl_agent.StepOutput(action=action, probs=probs) #nametupled
 
       if self._prev_timestep and not is_evaluation:
         self._rl_agent.add_transition(self._prev_timestep, self._prev_action,
@@ -306,10 +306,10 @@ class ReservoirBuffer(object):
     Args:
       element: data to be added to the reservoir buffer.
     """
-    if len(self._data) < self._reservoir_buffer_capacity:
+    if len(self._data) < self._reservoir_buffer_capacity: #没有溢出则直接加入
       self._data.append(element)
     else:
-      idx = np.random.randint(0, self._add_calls + 1)
+      idx = np.random.randint(0, self._add_calls + 1) #如果溢出则在 (0,self._all_call+1)中随机选择一个位置，在该位置保存这个元素
       if idx < self._reservoir_buffer_capacity:
         self._data[idx] = element
     self._add_calls += 1
@@ -326,10 +326,10 @@ class ReservoirBuffer(object):
     Raises:
       ValueError: If there are less than `num_samples` elements in the buffer
     """
-    if len(self._data) < num_samples:
+    if len(self._data) < num_samples: # 如果buffer中元素少于要采样的元素，则报错
       raise ValueError("{} elements could not be sampled from size {}".format(
           num_samples, len(self._data)))
-    return random.sample(self._data, num_samples)
+    return random.sample(self._data, num_samples) #否则采样num_samples个元素
 
   def clear(self):
     self._data = []

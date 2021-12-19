@@ -50,8 +50,8 @@ def test_run_kuhn():
   for unused_ep in range(10):
     time_step = env.reset()
     while not time_step.last():
-      current_player = time_step.observations["current_player"]
-      current_agent = agents[current_player]
+      current_player = time_step.observations["current_player"] #当前玩家
+      current_agent = agents[current_player] #当前玩家的agent
       agent_output = current_agent.step(time_step)
       time_step = env.step([agent_output.action])
     for agent in agents:
