@@ -45,9 +45,12 @@ def test_run_kuhn():
           num_actions=num_actions,
           hidden_layers_sizes=[16],
           reservoir_buffer_capacity=10,
+          min_buffer_size_to_learn=8,
+          batch_size=8,
+          learn_every=8,
           anticipatory_param=0.1) for player_id in [0, 1]
   ]
-  for unused_ep in range(10):
+  for unused_ep in range(1000):
     time_step = env.reset()
     while not time_step.last():
       current_player = time_step.observations["current_player"] #当前玩家
@@ -55,7 +58,7 @@ def test_run_kuhn():
       agent_output = current_agent.step(time_step)
       time_step = env.step([agent_output.action])
     for agent in agents:
-      agent.step(time_step)
+      agent.step(time_step) #这一步主要是将游戏状态重新初始化
 
 
 # class NFSPTest(TestCase):
