@@ -19,73 +19,105 @@ from __future__ import division
 from __future__ import print_function
 
 
-from torch.testing._internal.common_utils import run_tests
-from torch.testing._internal.common_utils import TestCase
+# from torch.testing._internal.common_utils import run_tests
+# from torch.testing._internal.common_utils import TestCase
+
+import os
+import sys
+
+path = '/'.join(os.path.abspath(__file__).split('/')[:-4])
+sys.path.insert(0,path)
+import open_spiel
+print(open_spiel.__file__)
 
 from open_spiel.python import rl_environment
 from open_spiel.python.pytorch import nfsp
 
+def test_run_kuhn():
+  env = rl_environment.Environment("kuhn_poker")
+  state_size = env.observation_spec()["info_state"][0]
+  num_actions = env.action_spec()["num_actions"]
 
-class NFSPTest(TestCase):
-
-  def test_run_kuhn(self):
-    env = rl_environment.Environment("kuhn_poker")
-    state_size = env.observation_spec()["info_state"][0]
-    num_actions = env.action_spec()["num_actions"]
-
-    agents = [
-        nfsp.NFSP(  # pylint: disable=g-complex-comprehension
-            player_id,
-            state_representation_size=state_size,
-            num_actions=num_actions,
-            hidden_layers_sizes=[16],
-            reservoir_buffer_capacity=10,
-            anticipatory_param=0.1) for player_id in [0, 1]
-    ]
-    for unused_ep in range(10):
-      time_step = env.reset()
-      while not time_step.last():
-        current_player = time_step.observations["current_player"]
-        current_agent = agents[current_player]
-        agent_output = current_agent.step(time_step)
-        time_step = env.step([agent_output.action])
-      for agent in agents:
-        agent.step(time_step)
+  agents = [
+      nfsp.NFSP(  # pylint: disable=g-complex-comprehension
+          player_id,
+          state_representation_size=state_size,
+          num_actions=num_actions,
+          hidden_layers_sizes=[16],
+          reservoir_buffer_capacity=10,
+          anticipatory_param=0.1) for player_id in [0, 1]
+  ]
+  for unused_ep in range(10):
+    time_step = env.reset()
+    while not time_step.last():
+      current_player = time_step.observations["current_player"]
+      current_agent = agents[current_player]
+      agent_output = current_agent.step(time_step)
+      time_step = env.step([agent_output.action])
+    for agent in agents:
+      agent.step(time_step)
 
 
-class ReservoirBufferTest(TestCase):
+# class NFSPTest(TestCase):
 
-  def test_reservoir_buffer_add(self):
-    reservoir_buffer = nfsp.ReservoirBuffer(reservoir_buffer_capacity=10)
-    self.assertEqual(len(reservoir_buffer), 0)
-    reservoir_buffer.add("entry1")
-    self.assertEqual(len(reservoir_buffer), 1)
-    reservoir_buffer.add("entry2")
-    self.assertEqual(len(reservoir_buffer), 2)
+#   def test_run_kuhn(self):
+#     env = rl_environment.Environment("kuhn_poker")
+#     state_size = env.observation_spec()["info_state"][0]
+#     num_actions = env.action_spec()["num_actions"]
 
-    self.assertIn("entry1", reservoir_buffer)
-    self.assertIn("entry2", reservoir_buffer)
+#     agents = [
+#         nfsp.NFSP(  # pylint: disable=g-complex-comprehension
+#             player_id,
+#             state_representation_size=state_size,
+#             num_actions=num_actions,
+#             hidden_layers_sizes=[16],
+#             reservoir_buffer_capacity=10,
+#             anticipatory_param=0.1) for player_id in [0, 1]
+#     ]
+#     for unused_ep in range(10):
+#       time_step = env.reset()
+#       while not time_step.last():
+#         current_player = time_step.observations["current_player"]
+#         current_agent = agents[current_player]
+#         agent_output = current_agent.step(time_step)
+#         time_step = env.step([agent_output.action])
+#       for agent in agents:
+#         agent.step(time_step)
 
-  def test_reservoir_buffer_max_capacity(self):
-    reservoir_buffer = nfsp.ReservoirBuffer(reservoir_buffer_capacity=2)
-    reservoir_buffer.add("entry1")
-    reservoir_buffer.add("entry2")
-    reservoir_buffer.add("entry3")
 
-    self.assertEqual(len(reservoir_buffer), 2)
+# class ReservoirBufferTest(TestCase):
 
-  def test_reservoir_buffer_sample(self):
-    replay_buffer = nfsp.ReservoirBuffer(reservoir_buffer_capacity=3)
-    replay_buffer.add("entry1")
-    replay_buffer.add("entry2")
-    replay_buffer.add("entry3")
+#   def test_reservoir_buffer_add(self):
+#     reservoir_buffer = nfsp.ReservoirBuffer(reservoir_buffer_capacity=10)
+#     self.assertEqual(len(reservoir_buffer), 0)
+#     reservoir_buffer.add("entry1")
+#     self.assertEqual(len(reservoir_buffer), 1)
+#     reservoir_buffer.add("entry2")
+#     self.assertEqual(len(reservoir_buffer), 2)
 
-    samples = replay_buffer.sample(3)
+#     self.assertIn("entry1", reservoir_buffer)
+#     self.assertIn("entry2", reservoir_buffer)
 
-    self.assertIn("entry1", samples)
-    self.assertIn("entry2", samples)
-    self.assertIn("entry3", samples)
+#   def test_reservoir_buffer_max_capacity(self):
+#     reservoir_buffer = nfsp.ReservoirBuffer(reservoir_buffer_capacity=2)
+#     reservoir_buffer.add("entry1")
+#     reservoir_buffer.add("entry2")
+#     reservoir_buffer.add("entry3")
+
+#     self.assertEqual(len(reservoir_buffer), 2)
+
+#   def test_reservoir_buffer_sample(self):
+#     replay_buffer = nfsp.ReservoirBuffer(reservoir_buffer_capacity=3)
+#     replay_buffer.add("entry1")
+#     replay_buffer.add("entry2")
+#     replay_buffer.add("entry3")
+
+#     samples = replay_buffer.sample(3)
+
+#     self.assertIn("entry1", samples)
+#     self.assertIn("entry2", samples)
+#     self.assertIn("entry3", samples)
 
 
 if __name__ == "__main__":
-  run_tests()
+  test_run_kuhn()
