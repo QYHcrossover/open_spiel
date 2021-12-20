@@ -46,7 +46,7 @@ class FictitiousPlayTest(absltest.TestCase):
     tabular_policy = policy.TabularPolicy(game)
     for player_id in range(2):
       for info_state, state_policy in average_policies[player_id].items():
-        policy_to_update = tabular_policy.policy_for_key(info_state)
+        policy_to_update = tabular_policy.policy_for_key(info_state)  #test
         for action, probability in state_policy.items():
           policy_to_update[action] = probability
     average_policy_values = expected_game_score.policy_value(
