@@ -20,12 +20,20 @@ from __future__ import print_function
 
 from absl.testing import absltest
 import numpy as np
+
+import os
+import sys
+
+path = '/'.join(os.path.abspath(__file__).split('/')[:-4])
+sys.path.insert(0,path)
+import open_spiel
+print(open_spiel.__file__)
+
 from open_spiel.python import policy
 from open_spiel.python.algorithms import expected_game_score
 from open_spiel.python.algorithms import exploitability
 from open_spiel.python.algorithms import fictitious_play
 import pyspiel
-
 
 class FictitiousPlayTest(absltest.TestCase):
 
@@ -119,4 +127,4 @@ class FictitiousPlayTest(absltest.TestCase):
 
 
 if __name__ == "__main__":
-  absltest.main()
+  FictitiousPlayTest().test_xfp()
