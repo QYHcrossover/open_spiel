@@ -55,10 +55,10 @@ def test_run_kuhn():
     while not time_step.last():
       current_player = time_step.observations["current_player"] #当前玩家
       current_agent = agents[current_player] #当前玩家的agent
-      agent_output = current_agent.step(time_step)
+      agent_output = current_agent.step(time_step) #返回当前玩家应采取的动作，这里的动作是由e-贪婪法选出来，或者策略网络评估出来的；每隔一个step还会对dqn网络和策略网络进行学习
       time_step = env.step([agent_output.action])
     for agent in agents:
-      agent.step(time_step) #这一步主要是将游戏状态重新初始化
+      agent.step(time_step) #这一步主要是将游戏状态重新初始化,如有必要也会进行网络的学习
 
 
 # class NFSPTest(TestCase):

@@ -161,7 +161,7 @@ class NFSP(rl_agent.AbstractAgent):
       A `rl_agent.StepOutput` containing the action probs and chosen action.
     """
     if self._mode == MODE.best_response:
-      agent_output = self._rl_agent.step(time_step, is_evaluation)
+      agent_output = self._rl_agent.step(time_step, is_evaluation) #best_response模式下,策略是由rl的agent的提供的，具体是e-贪婪法选择的；当动作是又贪婪法选择出来时，其它非选择的动作的prob为0；
       if not is_evaluation and not time_step.last():
         self._add_transition(time_step, agent_output) #如果best_response,则添加到 msl 中
 
