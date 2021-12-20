@@ -39,10 +39,10 @@ class FictitiousPlayTest(absltest.TestCase):
 
   def test_xfp(self):
     game = pyspiel.load_game("kuhn_poker")
-    xfp_solver = fictitious_play.XFPSolver(game)
+    xfp_solver = fictitious_play.XFPSolver(game) #对于每个玩家，初始化每个玩家的总policy，设置best_response，设置average_response
     for _ in range(100):
-      xfp_solver.iteration()
-    average_policies = xfp_solver.average_policy_tables()
+      xfp_solver.iteration() #总是先计算best_response，然后更新average_response
+    average_policies = xfp_solver.average_policy_tables() 
     tabular_policy = policy.TabularPolicy(game)
     for player_id in range(2):
       for info_state, state_policy in average_policies[player_id].items():

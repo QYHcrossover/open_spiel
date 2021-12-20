@@ -146,7 +146,7 @@ class XFPSolver(object):
     # (action, probability) tuples.
     self._policies = []
     for _ in range(self._num_players):
-      self._policies.append(_uniform_policy)
+      self._policies.append(_uniform_policy) #_uniform_policy 是一个函数，接受一个state输入，返回一个(action,prob)的列表,只会返回合法动作
       if save_oracles:
         self._oracles.append([_uniform_policy])
 

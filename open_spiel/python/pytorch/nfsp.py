@@ -123,7 +123,7 @@ class NFSP(rl_agent.AbstractAgent):
     yield
     self._mode = previous_mode
 
-  def _sample_episode_policy(self):
+  def _sample_episode_policy(self): #到底选择哪种模式
     if np.random.rand() < self._anticipatory_param:
       self._mode = MODE.best_response
     else:
